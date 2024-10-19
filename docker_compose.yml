@@ -1,0 +1,11 @@
+name: summarize-telegram-bot
+
+services:
+  summarize-telegram-bot:
+    container_name: summarize-telegram-bot
+    build: https://github.com/simonmysun/telegram-summarize-bot.git
+    init: true
+    volumes:
+      - /path/to/.env:/app/.env:r
+      - /path/to/prompt_template.txt:/app/prompt_template.txt:r
+    restart: unless-stopped
