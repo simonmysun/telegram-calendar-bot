@@ -14,12 +14,12 @@ client = AsyncOpenAI(
   base_url=os.getenv('OPENAI_API_URL') or 'https://api.openai.com/v1/',
 )
 
-async def complete(prompt: str) -> AsyncIterator[str]:
+async def complete(user_content: str, system_prompt: str = SYSTEM_PROMPT) -> AsyncIterator[str]:
   stream = await client.chat.completions.create(
     model=LLM_MODEL,
     messages=[
-      {"role": "system", "content": SYSTEM_PROMPT},
-      {"role": "user", "content": prompt}
+      {"role": "system", "content": system_prompt},
+      {"role": "user", "content": user_content}
     ],
     stream=True
   )

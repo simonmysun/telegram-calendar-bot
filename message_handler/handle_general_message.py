@@ -13,7 +13,7 @@ from telegram import constants
 
 from .llm_api import complete
 from .throttle import Throttle
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 MAX_INPUT_LENGTH = int(os.getenv('MAX_INPUT_LENGTH', '2000'))
 
@@ -57,15 +57,13 @@ async def handle_general_message(update: 'telegram.Update', context: 'telegram.e
     logger.error('Empty input. Task aborted.')
     await replyMessage.edit_text('ERROR: No input. Task aborted.')
     return
-  now = datetime.now()
-  prompt = _load_prompt_template().format(**{
-    'content': content,
-    'now': now.isoformat(timespec='seconds') + ' ' + now.strftime('%A'),
-  })
+  now = datetime.now(timezone.utc).replace(tzinfo=None)
+  user_content = f"现在时间是：{now.isoformat(timespec='seconds')} {now.strftime('%A')}。\n{content}"
+  system_prompt = _load_prompt_template()
   message = ''
   result = []
   try:
-    async for token in complete(prompt):
+    async for token in complete(user_content, system_prompt):
       result.append(token)
   except Exception as e:
     logger.error(f'ERROR: {repr(e)}')

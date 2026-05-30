@@ -5,27 +5,27 @@ from unittest.mock import AsyncMock, MagicMock, patch, mock_open
 from datetime import datetime, timedelta
 
 
-SIMPLE_TEMPLATE = 'Now: {now}\nContent: {content}'
+SIMPLE_TEMPLATE = 'You are a calendar assistant. Output only JSON.'
 
 VALID_LLM_JSON = '{"text": "Meeting with John", "location": "Office", "start": "2024-01-15T10:00:00", "duration": "0d0h40m"}'
 
 
-async def _fake_complete_ok(prompt: str):
+async def _fake_complete_ok(user_content: str, system_prompt: str = ''):
     yield VALID_LLM_JSON
 
 
-async def _fake_complete_empty(prompt: str):
+async def _fake_complete_empty(user_content: str, system_prompt: str = ''):
     # yields nothing
     return
     yield  # make it a generator
 
 
-async def _fake_complete_raises(prompt: str):
+async def _fake_complete_raises(user_content: str, system_prompt: str = ''):
     raise RuntimeError('API unreachable')
     yield  # make it a generator
 
 
-async def _fake_complete_bad_json(prompt: str):
+async def _fake_complete_bad_json(user_content: str, system_prompt: str = ''):
     yield 'not valid json at all'
 
 
@@ -98,8 +98,8 @@ async def test_reply_to_message_text_is_prepended(make_update, mock_context):
 
     captured_prompts: list[str] = []
 
-    async def capture_complete(prompt: str):
-        captured_prompts.append(prompt)
+    async def capture_complete(user_content: str, system_prompt: str = ''):
+        captured_prompts.append(user_content)
         yield VALID_LLM_JSON
 
     with patch('message_handler.handle_general_message.complete', capture_complete):
@@ -166,8 +166,8 @@ async def test_input_truncated_to_max_length(make_update, mock_context):
 
     captured: list[str] = []
 
-    async def capture_complete(prompt: str):
-        captured.append(prompt)
+    async def capture_complete(user_content: str, system_prompt: str = ''):
+        captured.append(user_content)
         yield VALID_LLM_JSON
 
     update = make_update(text='A' * 100)
