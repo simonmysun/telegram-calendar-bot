@@ -1,0 +1,20 @@
+name: telegram-calendar-bot
+
+services:
+  telegram-calendar-bot:
+    container_name: telegram-calendar-bot
+    build:
+      context: .
+      target: production
+    init: true
+    volumes:
+      - ./.env:/app/.env:ro
+      - ./prompt_template.txt:/app/prompt_template.txt:ro
+    restart: unless-stopped
+
+  test:
+    build:
+      context: .
+      target: test
+    profiles:
+      - test

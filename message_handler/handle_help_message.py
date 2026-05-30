@@ -7,7 +7,8 @@ if typing.TYPE_CHECKING:
 
 import os
 
-ADMIN_USER_IDS = list(map(int, os.getenv('ADMIN_USER_IDS').split(',')))
+_admin_ids_raw = os.getenv('ADMIN_USER_IDS', '')
+ADMIN_USER_IDS = list(map(int, _admin_ids_raw.split(','))) if _admin_ids_raw.strip() else []
 
 async def handle_help_message(update: 'telegram.Update', context: 'telegram.ext.CallbackContext') -> None:
   userId = update.message.from_user.id
